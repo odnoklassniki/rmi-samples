@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class InvocationServer implements InvocationServerMBean, Thread.UncaughtExceptionHandler {
     private static final Log log = LogFactory.getLog(InvocationServer.class);
-    private static final Log statsLog = LogFactory.getLog("one.rmi.server.stats");
 
     private volatile boolean running;
 

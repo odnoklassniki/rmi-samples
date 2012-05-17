@@ -1,9 +1,5 @@
 package one.rmi.client;
 
-import one.log.scheduler.ILoggingSchedulerTask;
-import one.log.scheduler.LoggingScheduler;
-import one.log.util.LoggerUtil;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -12,8 +8,6 @@ import java.net.InetAddress;
 import java.util.LinkedList;
 
 public abstract class SocketPoolInvoker {
-    private static final Log statsLog = LogFactory.getLog("one.rmi.client.stats");
-
     private final LinkedList<SocketWorker> queue = new LinkedList<SocketWorker>();
     private int workers;
     private boolean isClosed;
@@ -36,8 +30,6 @@ public abstract class SocketPoolInvoker {
         this.port = port;
         this.clientMaxPoolSize = clientMaxPoolSize;
         this.timeout = timeout;
-
-        LoggingScheduler.registerScheduling(getStatsLogger());
     }
 
     public void close() {
@@ -144,32 +136,6 @@ public abstract class SocketPoolInvoker {
 
     protected SocketWorker createSocketWorker() {
         return new SocketWorker();
-    }
-
-    protected ILoggingSchedulerTask getStatsLogger() {
-        return new ILoggingSchedulerTask() {
-            @Override
-            public int getPeriod() {
-                return 5;
-            }
-
-            @Override
-            public boolean isStop() {
-                return isClosed;
-            }
-
-            @Override
-            public void performLog() {
-                if (!isClosed && statsLog.isTraceEnabled()) {
-                    int poolSize, activeCount;
-                    synchronized (queue) {
-                        poolSize = workers;
-                        activeCount = poolSize - queue.size();
-                    }
-                    statsLog.trace(LoggerUtil.unionMessages(address, poolSize, activeCount));
-                }
-            }
-        };
     }
 
     public static SocketPoolInvoker create(String url) throws Exception {
